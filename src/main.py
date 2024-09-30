@@ -51,21 +51,21 @@ with device_tab:
 with unique_user_tab:
     statistics_df = pd.read_csv('statistics_cleaned.csv', sep=';')
     unique_users_count = statistics_df['MemberEmail'].nunique()
-    
+
     st.write("## Unikke brugere")
     st.markdown(f'''Antal af unikke brugere: :green-background[{unique_users_count}] ''')
 
     anonymous_users_df = statistics_df[statistics_df['MemberEmail'].isna()]
     unique_anonymous_sessions_count = anonymous_users_df['Session'].nunique()
-    
+
     st.write("## Unikke anonyme brugere")
     st.markdown(f'''Antal af unikke anonyme brugere: :red-background[{unique_anonymous_sessions_count}] ''')
-    
+
     unique_users_df = pd.DataFrame({
         'Metric': ['Unikke brugere', 'Unikke anonyme brugere'],
         'Count': [unique_users_count, unique_anonymous_sessions_count]
     })
-    
+
     chart_col, table_col = st.columns(2)
     with chart_col:
         unique_users_chart = alt.Chart(unique_users_df).mark_bar().encode(
