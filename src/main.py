@@ -47,3 +47,4 @@ with device_tab:
             height=500
         )
         st.altair_chart(device_chart, use_container_width=True, theme=None)
+        
