@@ -91,12 +91,12 @@ with completed_missions_tab:
         1400: "Ude i Skoven",
         1439: "Fremtiden - Hvad Synes Du?"
     }
-    
+
     completed_missions_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
     completed_missions_df = completed_missions_df[completed_missions_df['Type'] == 'missionEnd']
     completed_missions_df['Mission'] = completed_missions_df['Mission'].map(mission_names)
     completed_missions_df = completed_missions_df[['Mission']]
-    
+
     chart_col, table_col = st.columns(2)
     with chart_col:
         st.write("## Gennemførte missioner")
@@ -149,7 +149,7 @@ with completed_missions_tab:
     completed_missions_df = pd.read_csv('statistics_formatted_cleaned.csv', sep=';')
     completed_missions_df = completed_missions_df[['Mission']]
     chart_col, table_col = st.columns(2)
-    
+
     with chart_col:
         st.write("## Antal missioner")
         completed_missions_chart = alt.Chart(completed_missions_df).mark_bar().encode(
