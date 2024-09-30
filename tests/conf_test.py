@@ -33,4 +33,3 @@ def test_metrics(client):
     response = client.get('/metrics')
     assert response.status_code == 200
     assert 'up gauge\nup{name="test-pod"} 1.0' in response.text
-    
