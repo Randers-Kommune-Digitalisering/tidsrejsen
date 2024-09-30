@@ -47,3 +47,34 @@ with device_tab:
             height=500
         )
         st.altair_chart(device_chart, use_container_width=True, theme=None)
+
+with unique_user_tab:
+    statistics_df = pd.read_csv('statistics_cleaned.csv', sep=';')
+    unique_users_count = statistics_df['MemberEmail'].nunique()
+    
+    st.write("## Unikke brugere")
+    st.markdown(f'''Antal af unikke brugere: :green-background[{unique_users_count}] ''')
+
+    anonymous_users_df = statistics_df[statistics_df['MemberEmail'].isna()]
+    unique_anonymous_sessions_count = anonymous_users_df['Session'].nunique()
+    
+    st.write("## Unikke anonyme brugere")
+    st.markdown(f'''Antal af unikke anonyme brugere: :red-background[{unique_anonymous_sessions_count}] ''')
+    
+    unique_users_df = pd.DataFrame({
+        'Metric': ['Unikke brugere', 'Unikke anonyme brugere'],
+        'Count': [unique_users_count, unique_anonymous_sessions_count]
+    })
+    
+    chart_col, table_col = st.columns(2)
+    with chart_col:
+        unique_users_chart = alt.Chart(unique_users_df).mark_bar().encode(
+            x=alt.X('Metric', title='Brugere'),
+            y=alt.Y('Count', title='Antal af brugere'),
+            color=alt.Color('Metric', title='Brugere'),
+            tooltip=[alt.Tooltip('Count', title='Antal af brugere'), alt.Tooltip('Metric', title='Brugere')]
+        ).properties(
+            width=500,
+            height=500
+        )
+        st.altair_chart(unique_users_chart, use_container_width=True)
