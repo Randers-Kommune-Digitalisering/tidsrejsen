@@ -172,7 +172,7 @@ if keycloak.authenticated:
                 height=500
             )
             st.altair_chart(completed_missions_chart, use_container_width=True)
-    
+
     with chapter_tab:
         chapter_names = {
             1147: "RANDERS REGNSKOV",
@@ -195,10 +195,10 @@ if keycloak.authenticated:
                 y=alt.Y('Chapter', title='Kapitel', sort=list(chapter_names.values())),
                 color=alt.Color('Chapter', title='Kapitel'),
                 tooltip=[
-                alt.Tooltip('MemberEmail', title='Bruger'),
-                alt.Tooltip('Chapter', title='Kapitel'),
-                alt.Tooltip('ChapterCount', title='Antal Kapitler')
-            ]
+                    alt.Tooltip('MemberEmail', title='Bruger'),
+                    alt.Tooltip('Chapter', title='Kapitel'),
+                    alt.Tooltip('ChapterCount', title='Antal Kapitler')
+                ]
             ).properties(
                 width=500,
                 height=500
