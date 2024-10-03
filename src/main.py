@@ -172,6 +172,38 @@ if keycloak.authenticated:
                 height=500
             )
             st.altair_chart(completed_missions_chart, use_container_width=True)
+    
+    with chapter_tab:
+        chapter_names = {
+            1147: "RANDERS REGNSKOV",
+            1279: "RANDERS BY",
+            1281: "FUSSINGØ"
+        }
+
+        chapter_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
+        chapter_df = chapter_df[chapter_df['Type'].isin(['missionStep'])]
+        chapter_df['Chapter'] = chapter_df['Chapter'].map(chapter_names)
+        unique_chapter_df = chapter_df[['MemberEmail', 'Chapter']].drop_duplicates()
+        chapter_count_df = unique_chapter_df.groupby('MemberEmail').size().reset_index(name='ChapterCount')
+        unique_chapter_df = unique_chapter_df.merge(chapter_count_df, on='MemberEmail')
+
+        chart_col, table_col = st.columns(2)
+        with chart_col:
+            st.write("## Kapitler")
+            chapter_chart = alt.Chart(unique_chapter_df).mark_bar().encode(
+                x=alt.X('MemberEmail', title='Bruger'),
+                y=alt.Y('Chapter', title='Kapitel', sort=list(chapter_names.values())),
+                color=alt.Color('Chapter', title='Kapitel'),
+                tooltip=[
+                alt.Tooltip('MemberEmail', title='Bruger'),
+                alt.Tooltip('Chapter', title='Kapitel'),
+                alt.Tooltip('ChapterCount', title='Antal Kapitler')
+            ]
+            ).properties(
+                width=500,
+                height=500
+            )
+            st.altair_chart(chapter_chart, use_container_width=True)
 
 else:
     st.markdown('''<span style="color:red">Du er ikke logget ind</span>''', unsafe_allow_html=True)
