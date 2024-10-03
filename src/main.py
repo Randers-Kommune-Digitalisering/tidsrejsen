@@ -1,164 +1,177 @@
 import pandas as pd
 import altair as alt
 import streamlit as st
+from streamlit_keycloak import login
+
+from utils.config import KEYCLOAK_URL, KEYCLOAK_REALM, KEYCLOAK_CLIENT_ID
 
 pd.set_option('display.max_columns', None)
 
 st.set_page_config(page_title="Tidsrejsen", layout="wide")
 
-st.title("Tidsrejsen")
-tidsrejsen_link = 'https://tidsrejsen.dk/om-tidsrejsen/'
-st.link_button("Gå til Tidsrejsen", tidsrejsen_link, type='primary')
-device_tab, unique_user_tab, completed_missions_tab, chapter_tab, overview_tab, device_overview_tab = st.tabs(
-    ["Top 5 Anvendte Enheder", "Unikke brugere", ' Gennemførte missioner', 'Kapitler', 'Oversigt over Brugere', 'Overblik over Enheder']
+keycloak = login(
+    url=KEYCLOAK_URL,
+    realm=KEYCLOAK_REALM,
+    client_id=KEYCLOAK_CLIENT_ID
 )
 
-with device_tab:
-    device_df = pd.read_csv('statistics_formatted_cleaned.csv', sep=';')
-    device_df = device_df[['Device']]
-    device_counts = device_df['Device'].value_counts().reset_index()
-    device_counts.columns = ['Device', 'Count']
-    top_5_devices = device_counts.nlargest(5, 'Count')
+if keycloak.authenticated:
+    st.title("Tidsrejsen")
+    tidsrejsen_link = 'https://tidsrejsen.dk/om-tidsrejsen/'
+    st.link_button("Gå til Tidsrejsen", tidsrejsen_link, type='primary')
+    device_tab, unique_user_tab, completed_missions_tab, chapter_tab, overview_tab, device_overview_tab = st.tabs(
+        ["Top 5 Anvendte Enheder", "Unikke brugere", ' Missioner', 'Kapitler', 'Oversigt over Brugere', 'Overblik over Enheder']
+    )
 
-    chart_col, table_col = st.columns(2)
-    with chart_col:
-        st.write("## Top 5 Anvendte Enheder")
-        device_chart = alt.Chart(top_5_devices).mark_bar().encode(
-            x=alt.X('Device', title='Enheder'),
-            y=alt.Y('Count', title='Antal af enheder'),
-            color=alt.Color('Device', title='Enheder'),
-            tooltip=[alt.Tooltip('Device', title='Enhed'), alt.Tooltip('Count', title='Antal af enheder')]
-        ).properties(
-            width=500,
-            height=500
-        )
-        st.altair_chart(device_chart, use_container_width=True, theme=None)
+    with device_tab:
+        device_df = pd.read_csv('statistics_formatted_cleaned.csv', sep=';')
+        device_df = device_df[['Device']]
+        device_counts = device_df['Device'].value_counts().reset_index()
+        device_counts.columns = ['Device', 'Count']
+        top_5_devices = device_counts.nlargest(5, 'Count')
 
-    top_10_devices = device_counts.nlargest(10, 'Count')
+        chart_col, table_col = st.columns(2)
+        with chart_col:
+            st.write("## Top 5 Anvendte Enheder")
+            device_chart = alt.Chart(top_5_devices).mark_bar().encode(
+                x=alt.X('Device', title='Enheder'),
+                y=alt.Y('Count', title='Antal af enheder'),
+                color=alt.Color('Device', title='Enheder'),
+                tooltip=[alt.Tooltip('Device', title='Enhed'), alt.Tooltip('Count', title='Antal af enheder')]
+            ).properties(
+                width=500,
+                height=500
+            )
+            st.altair_chart(device_chart, use_container_width=True)
 
-    with chart_col:
-        st.write("## Top 10 Anvendte Enheder")
-        device_chart = alt.Chart(top_10_devices).mark_arc().encode(
-            theta=alt.Theta(field="Count", type="quantitative", title="Antal af enheder"),
-            color=alt.Color(field="Device", type="nominal", title="Enheder"),
-            tooltip=[alt.Tooltip('Count', title='Antal af enheder'), alt.Tooltip('Device', title='Enhed')]
-        ).properties(
-            width=500,
-            height=500
-        )
-        st.altair_chart(device_chart, use_container_width=True, theme=None)
+        top_10_devices = device_counts.nlargest(10, 'Count')
 
-with unique_user_tab:
-    unique_user_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
-    unique_users_count = unique_user_df['MemberEmail'].nunique()
+        with chart_col:
+            st.write("## Top 10 Anvendte Enheder")
+            device_chart = alt.Chart(top_10_devices).mark_arc().encode(
+                theta=alt.Theta(field="Count", type="quantitative", title="Antal af enheder"),
+                color=alt.Color(field="Device", type="nominal", title="Enheder"),
+                tooltip=[alt.Tooltip('Count', title='Antal af enheder'), alt.Tooltip('Device', title='Enhed')]
+            ).properties(
+                width=500,
+                height=500
+            )
+            st.altair_chart(device_chart, use_container_width=True)
 
-    st.write("## Unikke brugere")
-    st.markdown(f'''Antal af unikke brugere: :green-background[{unique_users_count}] ''')
+    with unique_user_tab:
+        unique_user_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
+        unique_users_count = unique_user_df['MemberEmail'].nunique()
 
-    anonymous_users_df = unique_user_df[unique_user_df['MemberEmail'].isna()]
-    unique_anonymous_sessions_count = anonymous_users_df['Session'].nunique()
+        st.write("## Unikke brugere")
+        st.markdown(f'''Antal af unikke brugere: :green-background[{unique_users_count}] ''')
 
-    st.write("## Unikke anonyme brugere")
-    st.markdown(f'''Antal af unikke anonyme brugere: :red-background[{unique_anonymous_sessions_count}] ''')
+        anonymous_users_df = unique_user_df[unique_user_df['MemberEmail'].isna()]
+        unique_anonymous_sessions_count = anonymous_users_df['Session'].nunique()
 
-    unique_users_df = pd.DataFrame({
-        'Metric': ['Unikke brugere', 'Unikke anonyme brugere'],
-        'Count': [unique_users_count, unique_anonymous_sessions_count]
-    })
+        st.write("## Unikke anonyme brugere")
+        st.markdown(f'''Antal af unikke anonyme brugere: :red-background[{unique_anonymous_sessions_count}] ''')
 
-    chart_col, table_col = st.columns(2)
-    with chart_col:
-        unique_users_chart = alt.Chart(unique_users_df).mark_bar().encode(
-            x=alt.X('Metric', title='Brugere'),
-            y=alt.Y('Count', title='Antal af brugere'),
-            color=alt.Color('Metric', title='Brugere'),
-            tooltip=[alt.Tooltip('Count', title='Antal af brugere'), alt.Tooltip('Metric', title='Brugere')]
-        ).properties(
-            width=500,
-            height=500
-        )
-        st.altair_chart(unique_users_chart, use_container_width=True)
+        unique_users_df = pd.DataFrame({
+            'Metric': ['Unikke brugere', 'Unikke anonyme brugere'],
+            'Count': [unique_users_count, unique_anonymous_sessions_count]
+        })
 
-with completed_missions_tab:
-    mission_names = {
-        1437: "Tidsrejsen",
-        1148: "De FE'E Dyr",
-        1268: "Verdens Tammeste Dyr",
-        1278: "Menneskedyrets Myretuer",
-        1399: "I lortens Fodspor",
-        1438: "De Byduelige Dyr",
-        1280: "Isens Kraft",
-        1400: "Ude i Skoven",
-        1439: "Fremtiden - Hvad Synes Du?"
-    }
+        chart_col, table_col = st.columns(2)
+        with chart_col:
+            unique_users_chart = alt.Chart(unique_users_df).mark_bar().encode(
+                x=alt.X('Metric', title='Brugere'),
+                y=alt.Y('Count', title='Antal af brugere'),
+                color=alt.Color('Metric', title='Brugere'),
+                tooltip=[alt.Tooltip('Count', title='Antal af brugere'), alt.Tooltip('Metric', title='Brugere')]
+            ).properties(
+                width=500,
+                height=500
+            )
+            st.altair_chart(unique_users_chart, use_container_width=True)
 
-    completed_missions_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
-    completed_missions_df = completed_missions_df[completed_missions_df['Type'] == 'missionEnd']
-    completed_missions_df['Mission'] = completed_missions_df['Mission'].map(mission_names)
-    completed_missions_df = completed_missions_df[['Mission']]
+    with completed_missions_tab:
+        mission_names = {
+            1437: "Tidsrejsen",
+            1148: "De FE'E Dyr",
+            1268: "Verdens Tammeste Dyr",
+            1278: "Menneskedyrets Myretuer",
+            1399: "I lortens Fodspor",
+            1438: "De Byduelige Dyr",
+            1280: "Isens Kraft",
+            1400: "Ude i Skoven",
+            1439: "Fremtiden - Hvad Synes Du?"
+        }
 
-    chart_col, table_col = st.columns(2)
-    with chart_col:
-        st.write("## Gennemførte missioner")
-        completed_missions_chart = alt.Chart(completed_missions_df).mark_bar().encode(
-            x=alt.X('Mission', title='Missioner'),
-            y=alt.Y('count()', title='Antal af gennemførte missioner'),
-            color=alt.Color('Mission', title='Missioner'),
-            tooltip=[alt.Tooltip('count()', title='Antal af gennemførte missioner'), alt.Tooltip('Mission', title='Mission')]
-        ).properties(
-            width=500,
-            height=500
-        )
-        st.altair_chart(completed_missions_chart, use_container_width=True)
+        completed_missions_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
+        completed_missions_df = completed_missions_df[completed_missions_df['Type'] == 'missionEnd']
+        completed_missions_df['Mission'] = completed_missions_df['Mission'].map(mission_names)
+        completed_missions_df = completed_missions_df[['Mission']]
 
-with completed_missions_tab:
-    mission_names = {
-        1437: "Tidsrejsen",
-        1148: "De FE'E Dyr",
-        1268: "Verdens Tammeste Dyr",
-        1278: "Menneskedyrets Myretuer",
-        1399: "I lortens Fodspor",
-        1438: "De Byduelige Dyr",
-        1280: "Isens Kraft",
-        1400: "Ude i Skoven",
-        1439: "Fremtiden - Hvad Synes Du?"
-    }
+        chart_col, table_col = st.columns(2)
+        with chart_col:
+            st.write("## Gennemførte missioner")
+            completed_missions_chart = alt.Chart(completed_missions_df).mark_bar().encode(
+                x=alt.X('Mission', title='Missioner'),
+                y=alt.Y('count()', title='Antal af gennemførte missioner'),
+                color=alt.Color('Mission', title='Missioner'),
+                tooltip=[alt.Tooltip('count()', title='Antal af gennemførte missioner'), alt.Tooltip('Mission', title='Mission')]
+            ).properties(
+                width=500,
+                height=500
+            )
+            st.altair_chart(completed_missions_chart, use_container_width=True)
 
-    completed_missions_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
-    completed_missions_df = completed_missions_df[completed_missions_df['Type'] == 'missionEnd']
-    completed_missions_df['Mission'] = completed_missions_df['Mission'].map(mission_names)
+    with completed_missions_tab:
+        mission_names = {
+            1437: "Tidsrejsen",
+            1148: "De FE'E Dyr",
+            1268: "Verdens Tammeste Dyr",
+            1278: "Menneskedyrets Myretuer",
+            1399: "I lortens Fodspor",
+            1438: "De Byduelige Dyr",
+            1280: "Isens Kraft",
+            1400: "Ude i Skoven",
+            1439: "Fremtiden - Hvad Synes Du?"
+        }
 
-    missions_per_user_df = completed_missions_df.groupby(['MemberEmail', 'Mission']).size().reset_index(name='CompletedMissions')
+        completed_missions_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
+        completed_missions_df = completed_missions_df[completed_missions_df['Type'] == 'missionEnd']
+        completed_missions_df['Mission'] = completed_missions_df['Mission'].map(mission_names)
 
-    chart_col, table_col = st.columns(2)
+        missions_per_user_df = completed_missions_df.groupby(['MemberEmail', 'Mission']).size().reset_index(name='CompletedMissions')
 
-    with chart_col:
-        st.write("## Gennemførte missioner pr. bruger")
-        completed_missions_chart = alt.Chart(missions_per_user_df).mark_bar().encode(
-            x=alt.X('MemberEmail', title='Bruger'),
-            y=alt.Y('CompletedMissions', title='Antal af gennemførte missioner'),
-            color=alt.Color('Mission', title='Missioner'),
-            tooltip=[alt.Tooltip('MemberEmail', title='Bruger'), alt.Tooltip('Mission', title='Mission'), alt.Tooltip('CompletedMissions', title='Antal af gennemførte missioner')]
-        ).properties(
-            width=500,
-            height=500
-        )
-        st.altair_chart(completed_missions_chart, use_container_width=True)
+        chart_col, table_col = st.columns(2)
 
-with completed_missions_tab:
-    completed_missions_df = pd.read_csv('statistics_formatted_cleaned.csv', sep=';')
-    completed_missions_df = completed_missions_df[['Mission']]
-    chart_col, table_col = st.columns(2)
+        with chart_col:
+            st.write("## Gennemførte missioner pr. bruger")
+            completed_missions_chart = alt.Chart(missions_per_user_df).mark_bar().encode(
+                x=alt.X('MemberEmail', title='Bruger'),
+                y=alt.Y('CompletedMissions', title='Antal af gennemførte missioner'),
+                color=alt.Color('Mission', title='Missioner'),
+                tooltip=[alt.Tooltip('MemberEmail', title='Bruger'), alt.Tooltip('Mission', title='Mission'), alt.Tooltip('CompletedMissions', title='Antal af gennemførte missioner')]
+            ).properties(
+                width=500,
+                height=500
+            )
+            st.altair_chart(completed_missions_chart, use_container_width=True)
 
-    with chart_col:
-        st.write("## Antal missioner")
-        completed_missions_chart = alt.Chart(completed_missions_df).mark_bar().encode(
-            x=alt.X('Mission', title='Missioner'),
-            y=alt.Y('count()', title='Antal af missioner'),
-            color=alt.Color('Mission', title='Missioner'),
-            tooltip=[alt.Tooltip('count()', title='Antal af missioner'), alt.Tooltip('Mission', title='Mission')]
-        ).properties(
-            width=500,
-            height=500
-        )
-        st.altair_chart(completed_missions_chart, use_container_width=True)
+    with completed_missions_tab:
+        completed_missions_df = pd.read_csv('statistics_formatted_cleaned.csv', sep=';')
+        completed_missions_df = completed_missions_df[['Mission']]
+        chart_col, table_col = st.columns(2)
+
+        with chart_col:
+            st.write("## Antal missioner")
+            completed_missions_chart = alt.Chart(completed_missions_df).mark_bar().encode(
+                x=alt.X('Mission', title='Missioner'),
+                y=alt.Y('count()', title='Antal af missioner'),
+                color=alt.Color('Mission', title='Missioner'),
+                tooltip=[alt.Tooltip('count()', title='Antal af missioner'), alt.Tooltip('Mission', title='Mission')]
+            ).properties(
+                width=500,
+                height=500
+            )
+            st.altair_chart(completed_missions_chart, use_container_width=True)
+
+else:
+    st.markdown(f'''<span style="color:red">Du er ikke logget ind</span>''', unsafe_allow_html=True)
