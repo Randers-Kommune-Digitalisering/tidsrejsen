@@ -174,4 +174,4 @@ if keycloak.authenticated:
             st.altair_chart(completed_missions_chart, use_container_width=True)
 
 else:
-    st.markdown(f'''<span style="color:red">Du er ikke logget ind</span>''', unsafe_allow_html=True)
+    st.markdown('''<span style="color:red">Du er ikke logget ind</span>''', unsafe_allow_html=True)
