@@ -17,8 +17,8 @@ keycloak = login(
 
 if keycloak.authenticated:
     st.title("Tidsrejsen")
-    tidsrejsen_link = 'https://tidsrejsen.dk/om-tidsrejsen/'
-    st.link_button("Gå til Tidsrejsen", tidsrejsen_link, type='primary')
+    tidsrejsen_link = 'https://tidsrejsen.dk/spillet/'
+    st.link_button("Omkring Tidsrejsen", tidsrejsen_link, type='primary')
     device_tab, unique_user_tab, completed_missions_tab, chapter_tab, overview_tab, device_overview_tab = st.tabs(
         ["Top 5 Anvendte Enheder", "Unikke brugere", ' Missioner', 'Kapitler', 'Oversigt over Brugere', 'Overblik over Enheder']
     )
@@ -205,6 +205,18 @@ if keycloak.authenticated:
                 height=500
             )
             st.altair_chart(chapter_chart, use_container_width=True)
+
+    with device_overview_tab:
+        test_df = pd.read_csv('statistics_formatted_cleaned.csv', sep=';')
+        test_df = test_df[['Device', 'Browser', 'TimeSpent']]
+        test_df = test_df.rename(columns={'TimeSpent': 'Spilletid'})
+
+        selected_device = st.selectbox("Vælg enhed", test_df['Device'].unique())
+        device_df = test_df[test_df['Device'] == selected_device]
+
+        st.markdown(f'''Overblik over enheder: :blue-background[{selected_device}] ''')
+
+        st.markdown(device_df.drop(columns='Device').to_html(), unsafe_allow_html=True)
 
 else:
     st.markdown('''<span style="color:red">Du er ikke logget ind</span>''', unsafe_allow_html=True)
