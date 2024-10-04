@@ -220,7 +220,7 @@ if keycloak.authenticated:
 
     with overview_tab:
         overview_df = pd.read_csv('statistics_cleaned.csv', sep=';')
-        overview_df = overview_df[['MemberEmail', 'Session', 'Type', 'Mission', 'Chapter', "DaysSpent", "QuestionText", "AnswerText" ,'TimeStamp']]
+        overview_df = overview_df[['MemberEmail', 'Session', 'Type', 'Mission', 'Chapter', "DaysSpent", "QuestionText", "AnswerText", 'TimeStamp']]
 
         selected_user = st.selectbox("Vælg bruger", overview_df['MemberEmail'].unique())
         user_df = overview_df[overview_df['MemberEmail'] == selected_user]
