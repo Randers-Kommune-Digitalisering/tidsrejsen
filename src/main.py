@@ -44,18 +44,19 @@ if keycloak.authenticated:
             )
             st.altair_chart(device_chart, use_container_width=True)
 
-        top_10_devices = device_counts.nlargest(10, 'Count')
+        with st.expander("Se Top 10 Anvendte Enheder"):
+            top_10_devices = device_counts.nlargest(10, 'Count')
 
-        with chart_col:
-            st.write("## Top 10 Anvendte Enheder")
-            device_chart = alt.Chart(top_10_devices).mark_arc().encode(
-                theta=alt.Theta(field="Count", type="quantitative", title="Antal af enheder"),
-                color=alt.Color(field="Device", type="nominal", title="Enheder"),
-                tooltip=[alt.Tooltip('Count', title='Antal af enheder'), alt.Tooltip('Device', title='Enhed')]
-            ).properties(
-                width=500,
-                height=500
-            )
+            with chart_col:
+                st.write("## Top 10 Anvendte Enheder")
+                device_chart = alt.Chart(top_10_devices).mark_arc().encode(
+                    theta=alt.Theta(field="Count", type="quantitative", title="Antal af enheder"),
+                    color=alt.Color(field="Device", type="nominal", title="Enheder"),
+                    tooltip=[alt.Tooltip('Count', title='Antal af enheder'), alt.Tooltip('Device', title='Enhed')]
+                ).properties(
+                    width=500,
+                    height=500
+                )
             st.altair_chart(device_chart, use_container_width=True)
 
     with unique_user_tab:
