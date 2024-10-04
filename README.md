@@ -8,7 +8,8 @@ Dette projekt har til formål at visualiserer følgende data
 * Hvilke kapitler, brugeren har været igennem
 * Hvilke styresystemer/mobiler, der er brugt. Kunne være en top 5
 * Hvor mange unikke sessions, der er for anonyme brugere
-* Antal af brugere som har oprettet sig
+* Oversigt over Brugere
+* Overblik over Enheder
 
 ## Køresel af main.py
 * Start applikationen: ```streamlit run main.py```
