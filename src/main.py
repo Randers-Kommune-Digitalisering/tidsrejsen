@@ -24,7 +24,8 @@ if keycloak.authenticated:
     )
 
     with device_tab:
-        device_df = pd.read_csv('statistics_formatted_cleaned.csv', sep=';')
+        uploaded_file = st.file_uploader("Upload CSV fil:", type=['csv'], key='device')
+        device_df = pd.read_csv(uploaded_file, sep=';')
         device_df = device_df[['Device']]
         device_counts = device_df['Device'].value_counts().reset_index()
         device_counts.columns = ['Device', 'Count']
@@ -60,7 +61,8 @@ if keycloak.authenticated:
             st.altair_chart(device_chart, use_container_width=True)
 
     with unique_user_tab:
-        unique_user_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
+        uploaded_file = st.file_uploader("Upload CSV fil:", type=['csv'], key='user')
+        unique_user_df = pd.read_csv(uploaded_file, sep=';')
         unique_users_count = unique_user_df['MemberEmail'].nunique()
 
         st.write("## Unikke brugere")
@@ -103,7 +105,8 @@ if keycloak.authenticated:
             1439: "Fremtiden - Hvad Synes Du?"
         }
 
-        completed_missions_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
+        uploaded_file = st.file_uploader("Upload CSV fil", type=['csv'], key='missions_completed')
+        completed_missions_df = pd.read_csv(uploaded_file, sep=';')
         completed_missions_df = completed_missions_df[completed_missions_df['Type'] == 'missionEnd']
         completed_missions_df['Mission'] = completed_missions_df['Mission'].map(mission_names)
         completed_missions_df = completed_missions_df[['Mission']]
@@ -135,7 +138,8 @@ if keycloak.authenticated:
             1439: "Fremtiden - Hvad Synes Du?"
         }
 
-        completed_missions_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
+        uploaded_file = st.file_uploader("Upload CSV fil", type=['csv'], key='missions_users')
+        completed_missions_df = pd.read_csv(uploaded_file, sep=';')
         completed_missions_df = completed_missions_df[completed_missions_df['Type'] == 'missionEnd']
         completed_missions_df['Mission'] = completed_missions_df['Mission'].map(mission_names)
 
@@ -156,24 +160,6 @@ if keycloak.authenticated:
             )
             st.altair_chart(completed_missions_chart, use_container_width=True)
 
-    with completed_missions_tab:
-        completed_missions_df = pd.read_csv('statistics_formatted_cleaned.csv', sep=';')
-        completed_missions_df = completed_missions_df[['Mission']]
-        chart_col, table_col = st.columns(2)
-
-        with chart_col:
-            st.write("## Antal missioner")
-            completed_missions_chart = alt.Chart(completed_missions_df).mark_bar().encode(
-                x=alt.X('Mission', title='Missioner'),
-                y=alt.Y('count()', title='Antal af missioner'),
-                color=alt.Color('Mission', title='Missioner'),
-                tooltip=[alt.Tooltip('count()', title='Antal af missioner'), alt.Tooltip('Mission', title='Mission')]
-            ).properties(
-                width=500,
-                height=500
-            )
-            st.altair_chart(completed_missions_chart, use_container_width=True)
-
     with chapter_tab:
         chapter_names = {
             1147: "RANDERS REGNSKOV",
@@ -181,7 +167,8 @@ if keycloak.authenticated:
             1281: "FUSSINGØ"
         }
 
-        chapter_df = pd.read_csv('tidsrejsen_updated.csv', sep=';')
+        uploaded_file = st.file_uploader("Upload CSV fil", type=['csv'], key='chapter')
+        chapter_df = pd.read_csv(uploaded_file, sep=';')
         chapter_df = chapter_df[chapter_df['Type'].isin(['missionStep'])]
         chapter_df['Chapter'] = chapter_df['Chapter'].map(chapter_names)
         unique_chapter_df = chapter_df[['MemberEmail', 'Chapter']].drop_duplicates()
@@ -206,20 +193,9 @@ if keycloak.authenticated:
             )
             st.altair_chart(chapter_chart, use_container_width=True)
 
-    with device_overview_tab:
-        test_df = pd.read_csv('statistics_formatted_cleaned.csv', sep=';')
-        test_df = test_df[['Device', 'Browser', 'TimeSpent']]
-        test_df = test_df.rename(columns={'TimeSpent': 'Spilletid'})
-
-        selected_device = st.selectbox("Vælg enhed", test_df['Device'].unique())
-        device_df = test_df[test_df['Device'] == selected_device]
-
-        st.markdown(f'''Overblik over enheder: :blue-background[{selected_device}] ''')
-
-        st.markdown(device_df.drop(columns='Device').to_html(), unsafe_allow_html=True)
-
     with overview_tab:
-        overview_df = pd.read_csv('statistics_cleaned.csv', sep=';')
+        uploaded_file = st.file_uploader("Upload CSV fil", type=['csv'], key='overview')
+        overview_df = pd.read_csv(uploaded_file, sep=';')
         overview_df = overview_df[['MemberEmail', 'Session', 'Type', 'Mission', 'Chapter', "DaysSpent", "QuestionText", "AnswerText", 'TimeStamp']]
 
         selected_user = st.selectbox("Vælg bruger", overview_df['MemberEmail'].unique())
