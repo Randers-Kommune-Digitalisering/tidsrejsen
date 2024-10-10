@@ -230,7 +230,7 @@ if keycloak.authenticated:
 
         with device_overview_tab:
             try:
-                device_overview_df = pd.read_csv('statistics_formatted_cleaned.csv', sep=';')
+                device_overview_df = file_df_1
                 device_overview_df = device_overview_df[['Device', 'Browser', 'TimeSpent']]
                 device_overview_df = device_overview_df.rename(columns={'TimeSpent': 'Spilletid'})
 
