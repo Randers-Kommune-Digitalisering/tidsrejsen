@@ -5,14 +5,14 @@ ENV GROUP_NAME=app
 ENV HOME=/app
 ENV GROUP_ID=11000
 ENV USER_ID=11001
-ENV PORT=8080
+ENV PORT=8501
 
 # Add user
 RUN addgroup --gid $GROUP_ID $GROUP_NAME && \
     adduser $USER_ID -u $USER_ID -D -G $GROUP_NAME -h $HOME
 
 # Install packages
-# RUN apt-get update && apt-get install -y build-essential
+RUN apt-get update && apt-get install --yes --no-install-recommends build-essential libmariadb-dev libpq-dev
 
 # Copy files and set working dir
 COPY . $HOME
@@ -28,4 +28,4 @@ EXPOSE $PORT
 # Set user
 USER $USER_ID
 
-ENTRYPOINT ["streamlit", "run", "main.py", "--server.port", "8080"]
+ENTRYPOINT ["streamlit", "run", "main.py", "--server.port", "8501"]
