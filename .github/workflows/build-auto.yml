@@ -4,11 +4,8 @@ name: Build (auto)
 
 # Controls when the workflow will run
 on:
-  push:
-    tags:
-      - 'v*.*.*'
   workflow_run:
-    workflows: [Unit tests]
+    workflows: [Lint]
     branches: [develop, main]
     types: 
       - completed
